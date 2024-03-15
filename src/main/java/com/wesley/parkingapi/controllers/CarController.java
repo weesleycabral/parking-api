@@ -2,58 +2,48 @@ package com.wesley.parkingapi.controllers;
 
 
 import com.wesley.parkingapi.models.Car;
-import com.wesley.parkingapi.repository.CarRepository;
+import com.wesley.parkingapi.services.ParkingService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @RestController
-@RequestMapping
+@RequestMapping("/cars")
 public class CarController {
-    private final CarRepository carRepository;
 
-    public CarController(CarRepository carRepository){
-        this.carRepository = carRepository;
-    }
+    @Autowired
+    private ParkingService parkingService;
 
-    @GetMapping("/cars")
+
+    @GetMapping
     public List<Car> getAllCars() {
-        return carRepository.findAll();
+        return parkingService.getAllCars();
     }
 
-    @GetMapping("/cars/{id}")
-    public Car getCarById(@RequestParam Long id) {
-        return carRepository.findById(id).orElse(null);
+    @GetMapping("/{id}")
+    public Car getCarById(@PathVariable Long id) {
+        return parkingService.getCarById(id);
     }
 
-    @PostMapping("/cars/register")
+    @PostMapping("/register")
     public Car registerCar(@RequestBody @Valid Car car) {
-        long count = carRepository.count();
-        if (count >= 10) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Estacionamento cheio");
-        }
-        car.setCheck_in(LocalDateTime.now());
-        return carRepository.save(car);
+        return parkingService.registerCar(car);
     }
 
-    @PutMapping("/cars/checkout/{id}")
+    @PutMapping("/checkout/{id}")
     public Car checkoutCar(@PathVariable Long id) {
-        Car car = carRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Carro não encontrado com id " + id));
-        car.setCheck_out(LocalDateTime.now());
-        return carRepository.save(car);
+        return parkingService.checkoutCar(id);
     }
 
-    @DeleteMapping("/cars/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public Car deleteCar(@PathVariable Long id) {
-        Car car = carRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Carro não encontrado com id " + id));
-        carRepository.delete(car);
-        return car;
+        return parkingService.deleteCar(id);
+    }
+
+    @DeleteMapping("/delete")
+    public void deleteAllCars() {
+        parkingService.deleteAllCars();
     }
 }

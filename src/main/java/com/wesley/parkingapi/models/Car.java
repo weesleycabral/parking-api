@@ -28,4 +28,6 @@ public class Car {
     private LocalDateTime check_in;
     private LocalDateTime check_out;
 
+    private CarStatus status;
+
 }
